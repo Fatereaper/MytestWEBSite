@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Windows 10 Emulator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0078D7;
+      overflow: hidden;
+    }
+    #lockScreen, #welcomeScreen, #desktop {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #lockScreen { display: flex; color: white;
+    background-image: url(https://avatars.mds.yandex.net/i?id=7069b31db2f33b3b9595ba95c5256ea9_l-4580368-images-thumbs&n=13);
+  align-items: center; }
+    #welcomeScreen { background: #0078D7; color: white; font-size: 24px; background-image: url(https://avatars.mds.yandex.net/i?id=8c48a02d54ccfcde92be2b46d379f508_l-10385932-images-thumbs&n=13); }
+    #desktop { background: #1b1b1b; color: white; overflow: hidden;
+    background-image: url(https://images.wallpaperscraft.ru/image/single/gory_ozero_noch_116672_3840x2160.jpg); }
+
+    .inputBox {
+      background: rgba(0,0,0,0.4);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .inputBox input {
+      padding: 10px;
+      border: none;
+      margin: 10px;
+      border-radius: 5px;
+      width: 200px;
+      font-size: 16px;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      border: 2px solid white;
+    }
+
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 48px;
+      width: 100%;
+      background: rgba(30,30,30,0.95);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+    #startButton {
+      width: 32px;
+      height: 32px;
+      background-image: url('https://cdn-icons-png.flaticon.com/128/25/25412.png');
+      background-size: cover;
+      margin-right: 10px;
+    }
+    #searchBox {
+      background: #2f2f2f;
+      color: gray;
+      border-radius: 6px;
+      padding: 5px 10px;
+      margin-right: auto;
+      font-size: 14px;
+    }
+    #fateTime {
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .icon {
+      width: 60px;
+      margin: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .icon img {
+      width: 48px;
+      height: 48px;
+    }
+
+    .window {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      background: white;
+      color: black;
+      border-radius: 8px;
+      overflow: hidden;
+      top: 100px;
+      left: 100px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 0 10px black;
+      z-index: 100;
+    }
+    .window-header {
+      background: #0078D7;
+      color: white;
+      padding: 10px 20px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .window-content {
+      flex: 1;
+      padding: 20px;
+      background: #f0f0f0;
+      overflow: auto;
+      text-align: justify;
+    }
+
+    .doc {
+      background: white;
+      border: 1px solid #ccc;
+      margin: 5px 0;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+
+
+  
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #888;
+      padding-bottom: 5px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-top: 30px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #bbb;
+      padding-bottom: 2px;
+      color: #555;
+    }
+
+    p {
+      margin: 10px 0;
+      text-indent: 20px;
+    }
+
+    b {
+      font-weight: 700;
+    }
+
+    .class-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-right: 6px;
+      font-size: 13px;
+    }
+
+    .brain {
+      background-color: #d6e0f0;
+      color: #204060;
+    }
+
+    .space {
+      background-color: #f9e0d9;
+      color: #802b1a;
+    }
+
+    .eldritch {
+      background-color: #eae6f7;
+      color: #3b1f66;
+    }
+    .greenbild {
+      background-color: rgb(200, 238, 199);
+      color: rgb(131, 207, 16);
+    }
+
+    .redacted {
+      background-color: #000;
+      color: #000;
+      padding: 0 6px;
+      border-radius: 2px;
+    }
+
+    .warning {
+      background-color: #7b1f1f;
+      color: black;
+      padding: 2px 8px;
+      font-size: 13px;
+      border-radius: 3px;
+      margin-left: 5px;
+    }
+
+
+  
+    h1, h2 {
+      color: #ff3c00;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    .section {
+      margin-bottom: 2.5em;
+      border-left: 2px solid #444;
+      padding-left: 1em;
+    }
+
+    .redacted {
+      background-color: #111;
+      color: #222;
+      padding: 0 6px;
+      border-radius: 3px;
+      font-style: italic;
+    }
+
+    .danger {
+      color: #ff3c00;
+      font-weight: bold;
+    }
+
+    .signature-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .signature {
+      color: #666;
+      font-family: monospace;
+      animation: float 5s ease-in-out infinite alternate;
+    }
+
+    .signature:nth-child(2) { animation-delay: 1s; }
+    .signature:nth-child(3) { animation-delay: 2s; }
+    .signature:nth-child(4) { animation-delay: 3s; }
+
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(-10px) rotate(0.5deg); opacity: 1; }
+    }
+
+    .note {
+      font-size: 0.9em;
+      color: #888;
+      font-style: italic;
+    }
+
+    .glitch {
+      display: inline-block;
+      color: #ccc;
+      position: relative;
+    }
+
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      color: #ff3c00;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .glitch::before {
+      animation: glitchTop 2s infinite linear alternate-reverse;
+    }
+
+    .glitch::after {
+      animation: glitchBottom 2s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitchTop {
+      0% { clip: rect(0, 900px, 0, 0); }
+      5% { clip: rect(0, 900px, 20px, 0); }
+      10% { clip: rect(0, 900px, 0, 0); }
+    }
+
+    @keyframes glitchBottom {
+      0% { clip: rect(0, 900px, 0, 0); }
+      5% { clip: rect(20px, 900px, 60px, 0); }
+      10% { clip: rect(0, 900px, 0, 0); }
+    }
+
+    
+
+
+    p {
+      margin: 12px 0;
+    }
+
+    .highlight {
+      font-weight: bold;
+      background: #fff2c7;
+      padding: 1px 4px;
+    }
+
+    .code {
+      font-family: monospace;
+      background: #eaeaea;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .range {
+      color: #444;
+      font-weight: bold;
+    }
+
+    .intelligence {
+      color: #2a4d9b;
+      font-weight: bold;
+    }
+
+    .parasite {
+      color: #a52a2a;
+      font-weight: bold;
+    }
+
+    .temporal {
+      color: #008080;
+      font-weight: bold;
+    }
+
+    .section-note {
+      font-style: italic;
+      color: #666;
+    }
+
+    .footer {
+      margin-top: 50px;
+      font-size: 10pt;
+      color: #888;
+      text-align: right;
+    }
+
+
+
+        p, li {
+      font-size: 13.5pt;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .highlight {
+      background-color: #fff7c2;
+      padding: 2px 5px;
+      font-weight: bold;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    .mode {
+      background-color: #e4eaf2;
+      padding: 8px 12px;
+      border-left: 5px solid #2a4d9b;
+      margin-bottom: 10px;
+    }
+
+    .warning {
+      background-color: #fbe6f3;
+      border-left: 5px solid #91288b;
+      padding: 8px 12px;
+      margin-top: 20px;
+    }
+
+    .technical {
+      font-family: monospace;
+      background: #eaeaea;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .footer {
+      font-size: 10pt;
+      color: #888;
+      text-align: right;
+      margin-top: 40px;
+    }
+
+
+    
+    .subclass, .classification {
+      margin-bottom: 1.5rem;
+    }
+
+    .title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
+
+    .example {
+      font-style: italic;
+      color: #555;
+      margin-top: 0.3rem;
+    }
+
+    .group {
+      background-color: #eef2f6;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+
+    .note {
+      font-size: 0.95rem;
+      color: #666;
+      margin-top: 1rem;
+    }
+
+        strong {
+      color: #003366;
+    }
+
+
+      .email-container {
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+  }
+  .header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 14px;
+  }
+  .header div {
+    margin: 2px 0;
+  }
+  .subject {
+    font-weight: 600;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #222;
+  }
+  .body-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre-wrap;
+  }
+  .signature {
+    margin-top: 25px;
+    color: #555;
+  }
+  .reply {
+    background: #f9f9fb;
+    border: 1px solid #c7d0e3;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+  }
+
+
+
+    .meta {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    .entry {
+      margin-bottom: 30px;
+    }
+    .entry time {
+      display: block;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+    .glitch {
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<div id="lockScreen">
+  <div class="inputBox">
+    <img src="C:\Users\MiPro\OneDrive\Desktop\Siteforlawash\avatar\unknown.png" class="avatar" id="lockAvatar">
+    <div><input type="text" id="loginInput" placeholder="Логин" /></div>
+    <div><input type="password" id="passInput" placeholder="Пароль" /></div>
+    <button onclick="tryLogin()">Войти</button>
+  </div>
+</div>
+
+<div id="welcomeScreen">
+  <img src="https://i.pinimg.com/originals/ea/76/c3/ea76c343f9bbd6917e9a094b9317ab9e.jpg" class="avatar">
+  <div>Добро пожаловать, Дмитрий</div>
+</div>
+
+<div id="desktop">
+  <div style="display:flex; flex-wrap: wrap; padding: 10px;">
+    <div class="icon" onclick="openWindow('folderWindow')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477585.png" />
+      <div>Аномалии</div>
+    </div>
+        <div class="icon" onclick="openWindow('document')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477585.png" />
+      <div>Системное</div>
+    </div>
+        <div class="icon" onclick="openWindow('personal')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477585.png" />
+      <div>Работа</div>
+    </div>
+    <div class="icon" onclick="openWindow('mailWindow')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477656.png" />
+      <div>Почта</div>
+    </div>
+      <div id="taskbar">
+    <div id="startButton"></div>
+    <div id="searchBox">Введите запрос для поиска</div>
+    <div id="fateTime">
+      <div>FateTime</div>
+      <div>17:43</div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Папка -->
+  <div id="folderWindow" class="window">
+    <div class="window-header">
+      Аномалии
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('doc1')">Объект №014-AZ «Шепчущий Угол»</div>
+      <div class="doc" onclick="openDoc('doc2')">Объект №001-AYZG-093</div>
+      <div class="doc" onclick="openDoc('doc3')">Объект №015-AZ «Два шага назад»</div>
+    </div>
+  </div>
+    <div id="document" class="window">
+    <div class="window-header">
+      Системное
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('doc6')">ПРИЛОЖЕНИЕ 3.3 — СИСТЕМА ЧАСТОТНОЙ КЛАССИФИКАЦИИ</div>
+      <div class="doc" onclick="openDoc('doc7')">Компас Садамора</div>
+      <div class="doc" onclick="openDoc('doc8')">Классификация Аномалий — ODAS</div>
+    </div>
+  </div>
+    <div id="personal" class="window">
+    <div class="window-header">
+      Работа
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('doc11')">Работа над объектом</div>
+      <div class="doc" onclick="openDoc('doc12')">Постановление ODAS</div>
+    </div>
+  </div>
+
+  <!-- Почта -->
+  <div id="mailWindow" class="window">
+    <div class="window-header">
+      Почта
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('mail1')">Приветствие и уточнение по категории "обыденные аномалии"</div>
+      <div class="doc" onclick="openDoc('mail2')">Добро пожаловать в «ODAS»</div>
+  </div>
+  </div>
+
+  <!-- Документы и письма -->
+  <div id="doc1" class="window"><div class="window-header">Объект №014-AZ «Шепчущий Угол» <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"><h1>Объект №014-AZ «Шепчущий Угол»</h1>
+
+  <p><span class="class-tag brain">Мозговой</span> 
+     <span class="class-tag space">Пространственный</span> 
+     <span class="class-tag eldritch">Неописуемый</span>
+  </p>
+
+  <p><b>Уровень угрозы:</b> <span class="warning">Критический</span><br>
+     <b>Статус:</b> высокая активность, средняя трудность локализации.</p>
+
+  <h2>Описание</h2>
+  <p>Объект 014-AZ представляет собой аномальное помещение, визуально идентичное комнатному углу прямоугольной формы, впервые зафиксированное на территории <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span> после инцидента пациента <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span> в психической больнице имени <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span>.</p>
+  <p>Внутреннее пространство объекта нарушает базовые принципы геометрии и ориентации: визуальное и тактильное восприятие расходятся, фиксируются неоднозначные направления гравитации и пространственные замкнутые петли. Невозможно определить точные размеры или форму объекта — все попытки картографирования приводят к логическим искажениям в сознании исследователя или к разрушению картографического носителя.</p>
+  <p>Аномалия оказывает выраженное психоактивное воздействие на разум находящегося внутри субъекта. Через 30–40 секунд после входа наблюдаются слуховые галлюцинации в форме тихих шепотов, содержание которых воспринимается как личное, направленное к субъекту и побуждающее остаться внутри. Воздействие прогрессирует: от лёгкой дезориентации к полной утрате идентичности, замещению памяти ложными событиями и формированию зависимости от нахождения внутри объекта. На поздних стадиях субъект отказывается покидать помещение, выражает убеждение, что всегда в нём находился, и проявляет агрессию к попыткам извлечения.</p>
+
+  <h2>Условия появления</h2>
+  <p>Условия появления объекта не до конца поняты, однако его возникновение зафиксировано в местах длительного пребывания людей в одиночестве, особенно при наличии углов с тремя сходящимися стенами и выраженным акустическим резонансом.</p>
+  <p>Аномалия активируется чаще всего в периоды высокой психологической нагрузки в окружающем пространстве. Повторные спонтанные появления объекта зафиксированы в разных частях помещения при совпадении архитектурных и психоэмоциональных условий, что подтверждает теорию паразитической природы объекта.</p>
+
+  <h2>Методы сдерживания</h2>
+  <p>Сдерживание осуществляется посредством полной герметизации субъекта, а именно <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span>. Контакт с объектом допускается только при наличии специального разрешения. Взаимодействие разрешено исключительно в составе группы не менее трёх сотрудников, оснащённых защитными шлемами с нейроакустическими фильтрами и стабилизаторами когнитивных отклонений.</p>
+  <p>Время пребывания внутри строго ограничено <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span> секундами. По окончании контакта <span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span>.</p>
+
+  <h2>Опасности</h2>
+  <p>Опасность объекта заключается в его способности незаметно перепрограммировать сознание, подменять восприятие реальности, а также в полной невозможности зафиксировать или объяснить структуру и принципы действия внутреннего пространства.</p>
+  <p>Попытки визуализации объекта, даже на основе субъективных описаний, приводили к повторной манифестации аномалии в новых зонах. Также зарегистрированы случаи "побочных следов" — проявления голосов, искажённых теней и навязчивых пространственных образов у лиц, контактировавших с объектом опосредованно.</p>
+
+  <h2>Прикреплённая группа</h2>
+  <p><span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span></p></div></div>
+  <div id="doc2" class="window"><div class="window-header">Объект №001-AYZG-093 <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content">
+  <h1>Объект №001-AYZG-093</h1>
+  <h2>«Путь к истокам и боли» <span class="redacted">[НЕТУ ДАННЫХ]</span></h2>
+
+  <div class="section">
+    <strong>Классы:</strong> ВСЕ<br>
+    <strong>Уровень угрозы:</strong> <span class="danger">Хаос</span><br>
+    <strong>Статус:</strong> небывалая активность, невозможная локализация.
+  </div>
+
+  <div class="section">
+    <strong>Описание:</strong><br>
+    Объект представляет собой аномальное пространство, визуально идентичное <span class="redacted">[НЕТУ ДАННЫХ]</span>, впервые зафиксированное на территории <span class="redacted">[ОГРАНИЧЕНИЯ ДОПУСКА]</span> после смерти агента <span class="redacted">[ОГРАНИЧЕНИЯ ДОПУСКА]</span>. Внутреннее пространство нарушает принципы геометрии, ориентации и времени... попытки картографирования приводят к искажению сознания или разрушению данных.
+  </div>
+
+  <div class="section">
+    <strong>Воздействие:</strong><br>
+    Аномалия оказывает <span class="redacted">[НЕТУ ДАННЫХ]</span>. На поздних стадиях субъекты "исчезают" из памяти окружающих и возвращаются «в исходное состояние».
+  </div>
+
+  <div class="section">
+    <strong>Условия появления:</strong><br>
+    <span class="redacted">[НЕТУ ДАННЫХ]</span>
+  </div>
+
+  <div class="section">
+    <strong>Методы сдерживания:</strong><br>
+    <span class="redacted">[НЕТУ ДАННЫХ]</span>
+  </div>
+
+  <div class="section">
+    <strong>Опасности:</strong><br>
+    Полная властность над сознанием субъекта. Невозможность физического вмешательства. Возможно наличие сущности, которая охотится в полной темноте и "видит" лишь разум. Единственным способом уклонения является наличие света или его словесное обозначение.
+  </div>
+
+  <div class="section">
+    <strong>Последние данные:</strong><br>
+    Последняя передача: «Нужно идти в комнаты с <span class="redacted">[ЗАЧЁРКНУТО]</span>... их значение САДа — <span class="glitch" data-text=",45216">,45216</span>».
+    <div class="note">
+      Комментарий аналитической группы: цифры не соответствуют известным частотам. Возможно, это обрыв координат или частоты.
+    </div>
+  </div>
+
+  <div class="section">
+    <strong>Прикреплённая группа:</strong><br>
+    <span class="redacted">[ОГРАНИЧЕНИЯ ДОПУСКА]</span>
+  </div>
+
+  <div class="section">
+    <strong>Памятка от Руководителя ОСН:</strong><br>
+    Исследования запрещены четырьмя мэрами. Все данные переданы в SCP и Глобальную Оккультную Коалицию. Уровень риска — непрогнозируемый.
+  </div>
+
+  <div class="signature-container">
+    <div class="signature">[ПОДПИСЬ-1]</div>
+    <div class="signature">[ПОДПИСЬ-2]</div>
+    <div class="signature">[ПОДПИСЬ-3]</div>
+    <div class="signature">[ПОДПИСЬ-4]</div>
+  </div>
+</div></div>
+  <div id="doc3" class="window"><div class="window-header">Объект №015-AZ «Два шага назад» <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content">
+  <h1>Объект №015-AZ «Два шага назад»</h1>
+
+  <p><span class="class-tag greenbild">Временной</span> 
+  </p>
+
+  <p><b>Уровень угрозы:</b> <span class="warning">Высокий</span><br>
+     <b>Статус:</b> локализован частично, активность переменная</p>
+
+  <h2>Описание</h2>
+  <p>Объект 015-AZ представляет собой аномальное пространственно-временное искажение, проявляющееся в пределах строго локализованной архитектурной зоны — чаще всего в лестничных пролётах, узких коридорах или проходных помещениях с повторяющейся симметрией.</p>
+  <p>Основным проявлением аномалии является так называемый «эффект повторения шага»: субъект, двигающийся вперёд, начинает ощущать, что его перемещение вызывает откат на 1–2 шага назад, несмотря на отсутствие визуальных признаков возврата. Нарушение фиксируется исключительно на субъективном уровне: наблюдатели со стороны не видят отклонений, камеры наблюдения регистрируют непрерывное линейное движение, однако сам субъект ощущает и <em>воспринимает</em> возврат к предыдущей точке.</p>
+  <p>При длительном нахождении внутри объекта развивается стойкое чувство дежавю, тревоги и замкнутости. Через 3–5 минут начинается временное смешение событий: субъект начинает видеть себя в будущем или прошлом, фиксирует действия, которые ещё не были совершены, либо испытывает трудности с определением текущего времени суток. При переходе порога в ~7 минут наблюдается «самораздвоение» — субъект начинает слышать собственные шаги в противофазе, чувствует присутствие "второго себя", который движется в противоположном направлении. Дальнейшее пребывание может привести к когнитивному сдвигу: невозможность определить направление движения, ощущение бесконечного повторения событий, потеря ориентации во времени. В тяжёлых случаях — отказ от общения, кататония, разрушение причинно-следственных связей в мышлении.</p>
+
+  <h2>Условия появления</h2>
+  <p>Объект проявляется в архитектурных пространствах с сильной симметрией и отсутствием окон, особенно при наличии ритмических звуков (капель воды, шагов, метрономов). Повышенный риск манифестации связан с местами, в которых ранее фиксировались суицидальные или предкризисные состояния. Предположительно, объект питается перцептивным напряжением и искажает восприятие времени в ответ на эмоциональное давление.</p>
+
+  <h2>Методы сдерживания</h2>
+  <p>Зона, подверженная проявлению объекта, должна быть физически ограничена, с полным удалением зеркальных поверхностей, симметричных элементов и ритмических источников звука. Проход разрешён только по строго заданному маршруту, с фиксацией времени и сопровождением. Контакт возможен лишь в присутствии внешнего наблюдателя и под непрерывным нейрокогнитивным контролем. В случае выявления симптомов «шага назад» субъект немедленно выводится из зоны и подвергается экстренной стабилизации восприятия.</p>
+
+  <h2>Опасности</h2>
+  <p>Основная опасность объекта — в его способности вызывать рассинхронизацию восприятия времени у субъекта и навязчивую цикличность поведения. Зафиксированы случаи, когда исследователи теряли счёт времени, не могли выбраться из коридора, и начинали повторять одни и те же действия в течение нескольких часов, полагая, что делают это впервые.</p>
+  <p>Некоторые случаи приводили к полной временной изоляции сознания — субъекты продолжали двигаться, но фиксировали события, якобы происходящие «до» или «после» их настоящего положения во времени.</p>
+
+  <h2>Прикреплённая группа</h2>
+  <p><span class="redacted">ОГРАНИЧЕНИЯ ДОПУСКА</span></p>
+
+</div></div>
+  <div id="doc6" class="window"><div class="window-header">ПРИЛОЖЕНИЕ 3.3 — СИСТЕМА ЧАСТОТНОЙ КЛАССИФИКАЦИИ <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"> <h1>ПРИЛОЖЕНИЕ 3.3 — СИСТЕМА ЧАСТОТНОЙ КЛАССИФИКАЦИИ<br>(ед. изм. «сад»)</h1>
+
+  <p>С целью стандартизации внутреннего документооборота, унификации наблюдений и расчёта вероятностей проявления объектов, утверждена единая система оценки частоты появления аномалий. Основной единицей измерения выступает <span class="highlight">сад</span>. Значение частоты отображает среднюю условную вероятность фиксации аномалии в активной зоне за установленный цикл наблюдения.</p>
+
+  <p>Базовое значение — <b>1 сад</b> — соответствует средней, стандартной частоте проявления, зафиксированной по агрегированным данным наблюдений. Значения выше 1 обозначают возрастающую распространённость, значения ниже 1 — редкость или нестабильность манифестации.</p>
+
+  <p>Частота рассчитывается по совокупным наблюдениям, отражает не абсолютное количество проявлений, а <b>степень закономерности и предсказуемости</b> объекта. При этом допускаются дробные значения, превышающие или не достигающие единицы в зависимости от характера объекта и точности фиксации.</p>
+
+  <h2>Частотные связи и кодовые шаблоны</h2>
+
+  <p>Некоторые группы аномалий демонстрируют устойчивые закономерности в структуре своих частот. Эти зависимости зафиксированы и обязательны к учёту при систематизации.</p>
+
+  <ul>
+    <li><span class="intelligence">Разумные</span> аномалии (когнитивные, речевые, поведенческие) имеют частоты, <b>всегда оканчивающиеся на .658</b> — <span class="code">0.658</span>, <span class="code">3.658</span>, <span class="code">7.658</span>.</li>
+
+    <li><span class="parasite">Паразитические</span>, <span class="parasite">пространственные</span> и <span class="parasite">архитектурные</span> — частоты в пределах <b>0.3–1.1</b>, часто с повторениями: <span class="code">0.66</span>, <span class="code">0.99</span>.</li>
+
+    <li><span class="temporal">Временные</span> — нестабильные, плавающие значения, обычно в формате диапазона, например: <span class="code">0.4–0.9 садов</span>.</li>
+  </ul>
+
+  <h2>Интерпретация значений</h2>
+
+  <ul>
+    <li><span class="range">&lt; 0.1</span> — крайне редкая аномалия, требует искусственного пробуждения или уникальных условий.</li>
+    <li><span class="range">0.1–0.5</span> — спонтанное появление в особых средах, непредсказуемое, часто связано с триггерами.</li>
+    <li><span class="range">0.6–1.2</span> — нормализованная активность, обнаружение возможно при пассивном наблюдении.</li>
+    <li><span class="range">&gt; 1.2</span> — высокая активность, возможное фоновое присутствие в зоне.</li>
+    <li><span class="range">&gt; 5.0</span> — массовое проявление, объект представляет системную угрозу.</li>
+  </ul>
+
+  <p class="section-note">Все значения подлежат ревизии при изменении условий, активности или наличии других объектов. Работа осуществляется по протоколу <span class="code">«Лепесток 5-А»</span> при уровне допуска не ниже <b>4b</b>.</p>
+
+  <div class="footer">
+    Документ зафиксирован системой &mdash; 22.07.2025
+  </div></div></div>
+  <div id="doc7" class="window"><div class="window-header">Компас Садамора <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"> <h1>Компас Садамора</h1>
+
+  <div class="section">
+    <p><b>Классификация:</b> специализированное аналитико-полевое оборудование<br>
+    <b>Назначение:</b> детекция, измерение и картографирование частоты аномального проявления (в садах)</p>
+  </div>
+
+  <h2>Общее описание</h2>
+  <p>Компас Садамора представляет собой портативный многофункциональный прибор, предназначенный для непрерывного мониторинга и численного анализа флуктуаций аномальной активности в конкретной области пространства. Измерения производятся в стандартизированных единицах <span class="highlight">сад</span>, отражающих условную частоту появления объектов с аномальными характеристиками.</p>
+
+  <p>Прибор получил своё наименование по имени <b>Садамора Кацуки</b> — одного из первооткрывателей модели стохастической аномальной плотности (SAP), разработанной в рамках Протокола <span class="technical">«Каскад 4-Ультра»</span>.</p>
+
+  <h2>Принцип действия</h2>
+  <ul>
+    <li>Активная нейроэкологическая сенсика — анализ изменений в фоновых когнитивных параметрах среды.</li>
+    <li>Фазово-акустическая интерференция — обнаружение микроволн скрытых резонансов.</li>
+    <li>Анализ ритмов частичной синхронизации — регистрация повторяющихся структур, связанных с аномальным поведением объектов.</li>
+    <li>Топографическая корреляция — построение модели «всхождения» или «оседания» активности на микролокальных участках.</li>
+  </ul>
+  <p>Система обрабатывает данные в реальном времени и отображает значения на главном шкальном экране, сопровождая их направленным вектором вероятностного дрейфа.</p>
+
+  <h2>Функциональные режимы</h2>
+  <div class="mode">Режим пассивного зондирования — используется при предварительной разведке, не вызывает реакции у большинства чувствительных объектов.</div>
+  <div class="mode">Режим пространственной привязки — позволяет построить локальную карту плотности аномалий с разбивкой по секторам.</div>
+  <div class="mode">Режим пикового анализа — фиксирует кратковременные импульсы садовых выбросов, характерные для нестабильных объектов.</div>
+  <div class="mode">Режим подавления симулякров — автоматическое исключение ложных или навязанных показателей, вызванных когнитивным заражением.</div>
+
+  <h2>Стандарты и допуски</h2>
+  <ul>
+    <li>Диапазон измерения: <span class="technical">от 0.001 до 99.999 садов</span></li>
+    <li>Погрешность: не превышает <span class="technical">±0.006 сад</span> в статических условиях</li>
+    <li>Обновление данных: <span class="technical">каждые 1.7 секунды</span></li>
+    <li>Защита от внешних вмешательств: тройная экранировка, биопароль допуска, изоляция от нейронных резонансов класса B и выше</li>
+  </ul>
+
+  <h2>Особые пометки</h2>
+  <div class="warning">
+    В случае фиксации значений, оканчивающихся на <span class="technical">.658</span>, устройство подаёт немедленный сигнал тревоги с цветовой индикацией фиолетового спектра. Это указывает на активность аномального объекта с признаками разума.
+  </div>
+
+  <div class="warning">
+    При показателях выше <span class="technical">5.0 садов</span> прибор автоматически переходит в режим непрерывной записи и активирует протокол предсдерживания, если он внедрён в сетевой контур оперативной группы.
+  </div>
+
+  <p>Компас Садамора является <b>обязательным элементом снаряжения</b> всех выездных групп допуска 3 и выше, задействованных в операциях по обнаружению, сдерживанию или мониторингу нестабильных зон. Использование прибора без должного допуска карается согласно Протоколу безопасности <span class="technical">А-19</span>.</p>
+
+  <div class="footer">
+    Закреплено нормативом №014-Σ / от 22.07.2025
+  </div>
+</div></div>
+  <div id="doc8" class="window"><div class="window-header">Классификация Аномалий — ODAS <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"><div class="container">
+    <h1>Классификация Аномалий</h1>
+
+    <h2>Подклассы по уровню угрозы</h2>
+
+    <div class="subclass">
+      <div class="title">ПОД.КЛАСС "СТАТИЧНЫЙ"</div>
+      <p>Минимальный уровень угрозы. Аномалия полностью изолирована, не проявляет активности за пределами строго определённых условий. Может находиться в пассивном состоянии бесконечно долго. Угроза персоналу отсутствует при соблюдении элементарных процедур.</p>
+      <div class="example">Пример: объект, реагирующий только на крайне редкие или невозможные стимулы.</div>
+    </div>
+
+    <div class="subclass">
+      <div class="title">ПОД.КЛАСС "ПОДКОНТРОЛЬНЫЙ"</div>
+      <p>Угроза существует, но стабильна. Аномалия изучена, меры сдерживания отлажены, взаимодействие возможно. Условно безопасна при соблюдении регламентов. Требует выездную группу.</p>
+      <div class="example">Пример: объект, изменяющий материю в ограниченном радиусе при прямом контакте.</div>
+    </div>
+
+    <div class="subclass">
+      <div class="title">ПОД.КЛАСС "НЕСТАБИЛЬНЫЙ"</div>
+      <p>Опасный объект с непредсказуемыми свойствами. Возможны спонтанные выбросы энергии, изменения формы, поведения или окружения. Угроза жизни и сознанию людей высока.</p>
+      <div class="example">Пример: существо, периодически теряющее физическую форму и перемещающееся сквозь пространство.</div>
+    </div>
+
+    <div class="subclass">
+      <div class="title">ПОД.КЛАСС "КРИТИЧЕСКИЙ"</div>
+      <p>Существенная угроза локальному или региональному масштабу. Наличие свойств, способных разрушать, заражать или деформировать среду без видимых ограничений. Контакт допускается только через дистанционные средства или специализированные группы.</p>
+      <div class="example">Пример: объект, искажающий причинно-следственные связи и временные контуры.</div>
+    </div>
+
+    <div class="subclass">
+      <div class="title">ПОД.КЛАСС "УНИЧТОЖАЮЩИЙ"</div>
+      <p>Угроза глобального уровня. Возможность полного исчезновения человеческой цивилизации при неудачном взаимодействии. Сдерживание крайне затруднено или невозможно. Предпочтительная стратегия — изоляция, уничтожение или дезинформация.</p>
+      <div class="example">Пример: аномалия, способная влиять на коллективное сознание или физические законы.</div>
+    </div>
+
+    <div class="group">
+      <div class="title">Класс <strong>interior</strong></div>
+      <p>Основной класс. Аномалия подлежит юрисдикции организации, может быть сдержана или уничтожена.</p>
+
+      <div class="title">Класс <strong>externum</strong></div>
+      <p>Аномалия не входит в сферу ответственности ODAS. При обнаружении необходимо немедленно сообщить группе СВС второго подраздела.</p>
+    </div>
+
+    <h2>Классификация по типу воздействия</h2>
+
+    <div class="classification">
+      <div class="title">«РАЗУМНЫЙ»</div>
+      <p>Аномалия проявляет сознание, интеллект, способность к коммуникации. Может манипулировать, адаптироваться и вступать в диалог. Особый протокол взаимодействия обязателен.</p>
+      <div class="example">Примеры: сущности, притворяющиеся людьми; симуляции, осознающие себя.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«ФИЗИЧЕСКИЙ»</div>
+      <p>Аномалия воздействует на материальный мир в рамках или на границе физических законов. Может быть объектом, существом или веществом.</p>
+      <div class="example">Примеры: металл, самовосстанавливающийся после повреждений; жидкость, разрушающая любые материалы, кроме одного.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«ВРЕМЕННОЙ»</div>
+      <p>Аномалия искажает течение времени, отменяет или повторяет события, нарушает причинно-следственные связи.</p>
+      <div class="example">Примеры: объект, возвращающий всё вокруг на минуту назад; область с полной остановкой времени.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«ПРОСТРАНСТВЕННЫЙ»</div>
+      <p>Аномалия искажает геометрию и расстояния, может создавать порталы, внекарманные зоны, архитектурные парадоксы.</p>
+      <div class="example">Примеры: дверь, ведущая в бесконечный коридор; здание, внутренний объём которого превышает внешний.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«ТОПОЛОГИЧЕСКИЙ»</div>
+      <p>Аномалия нарушает структуру пространства, создаёт невозможные формы и замкнутые реверсии.</p>
+      <div class="example">Примеры: лестница, поднимающая бесконечно; комната, чьи стены — её же внешняя оболочка.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«НЕИЗВЕСТНЫЙ»</div>
+      <p>Природа аномалии не установлена. Свойства не поддаются интерпретации. Все контакты проводятся дистанционно.</p>
+      <div class="example">Примеры: излучение неустановленного спектра; структуры, наблюдаемые только в данных.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«НЕОПИСУЕМЫЙ»</div>
+      <p>Аномалия не может быть описана. Попытки приводят к когнитивным искажениям, потере памяти или рассудка.</p>
+      <div class="example">Примеры: объект, описания которого всегда различны; структура, невозможная к осознанию.</div>
+    </div>
+
+    <div class="classification">
+      <div class="title">«МОЗГОВОЙ»</div>
+      <p>Воздействует на восприятие, память, мышление и личность человека. Возможны галлюцинации, подмена воли и навязанные действия.</p>
+      <div class="example">Примеры: навязчивые образы; полная подмена индивидуальности.</div>
+    </div>
+
+    <div class="note">
+      Для работы с любым объектом необходимо строго следовать протоколам ODAS и соблюдать иерархию допуска.
+    </div>
+  </div></div></div>
+  <div id="doc11" class="window"><div class="window-header">Работа над объектом <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content">
+    <div class="container">
+    <h1>ЛИЧНЫЙ ДНЕВНИК (Фрагмент)</h1>
+    <div class="meta">
+      Кодовый идентификатор: <strong>BRAM-JOURNAL-093</strong><br>
+      Допуск: <strong>Δ-Чёрный</strong><br>
+      Владелец: <strong>Маркус Брам</strong>, агент центра Браво VII-типа<br>
+      Объект: <strong>001-AYZG-093 "Путь к истокам и боли"</strong>
+    </div>
+
+    <div class="entry">
+      <time>[День 1 | 12.02.2025 | 22:18 UTC]</time>
+      Прибыл в сектор Bravo. сектор чист. Запросил расшифровку фрагментов Компаса Садамора. Начал сортировку слухов — слишком много "оттенков страха", слишком мало точек сходства. Объект упоминается только через отрицание.
+      <br>Я слышал термин "анти-название". Что-то в этом есть.
+    </div>
+
+    <div class="entry">
+      <time>[День 3 | 14.02.2025 | 04:42 UTC]</time>
+      Фрагмент памяти агента М. вызывает странную реакцию — повторяю его в голове, и у меня звон в ушах. Часть речи отсутствует, но я знаю, что она там была.
+      <br>Заметка: проверить возможное влияние на долговременную память.
+      <br>Почему-то не могу записать слово "<span class="glitch">внутрь</span>". Каждый раз рука дрожит.
+    </div>
+
+    <div class="entry">
+      <time>[День 5 | 16.02.2025 | 03:13 UTC]</time>
+      Получил шумовой лог, предположительно — "сущность", зарегистрированная в полном акустическом вакууме. Нет волн, но есть... ощущение взгляда. Это как если бы кто-то ждал, чтобы ты понял, что он уже рядом.
+      <br>Я выключил свет в лаборатории на 0,3 секунды — зафиксировал скачок садов на значение <strong>0,45216</strong>. Это... совпадение?
+    </div>
+
+    <div class="entry">
+      <time>[День 6 | 17.02.2025 | 01:01 UTC]</time>
+      Пытался расшифровать остатки письма, переданного через фильтр-коммуникатор агента К. Строка:
+      <blockquote>"они не несут тьму — они ею становятся, и тогда дверь уже не дверь"</blockquote>
+      Эта фраза стала мне сниться. Сегодня я её записал — и строки исчезли с бумаги.
+      <br>Я не сумасшедший. Я проверил: чернила есть, слова — нет. Только след давления руки.
+    </div>
+
+    <div class="entry">
+      <time>[День 7 | 18.02.2025 | 05:55 UTC]</time>
+      Письмо от Ф.М. пришло с пометкой «без повторной передачи». Он написал только одну строчку:
+      <blockquote>"Свет — это крик. Шёпотом не дыши."</blockquote>
+      Я не понимаю. Или… понимаю слишком буквально.
+    </div>
+
+    <div class="entry">
+      <time>[День 9 | 20.02.2025 | ??:?? UTC]</time>
+      Компас Садамора сломался. Он не показывает сады.
+      <br>Данные исчезают. Я начал забывать, где именно я нахожусь. Комната?
+      <br>Нет углов. Нет центра. Всё тихо. Всё тянет <strong>обратно</strong>.
+    </div>
+
+    <div class="entry">
+      <time>[День 30 | 11.03.2025 | ??:?? UTC]</time>
+      Я прошел подготовку для противодействия аномалии, я внедрюсь в структура сектора Bravo где скорее всего будет находится следующий цикл, к тому же я проверил личные дела людей проживающих в доме B-15. В принципе ничего интересного, кроме одного. Скорее всего житель на 5 этаже в 2 квартире — человек из Фонда. Интересно...
+    </div></div></div></div>
+  <div id="doc12" class="window"><div class="window-header">Постановление ODAS <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"><h1>O.D.A.S.<br>ВНУТРЕННИЙ ДОКУМЕНТ — УРОВЕНЬ ДОПУСКА: [II/СТРОГО]</h1>
+
+  <div class="codeblock">
+    <div><span class="label">КОД ЗАПИСИ:</span> 001-FM-BRAM/Δ</div>
+  </div>
+
+  <div class="title">ПРЯМОЕ ПОСТАНОВЛЕНИЕ</div>
+
+  <div class="section">
+    <span class="label">Адресат:</span> Маркус Брам, Выездной агент центра Браво VII-типа.<br>
+    <span class="label">Отправитель:</span> Ф.М. Старший куратор и распределитель дел O.D.A.S.<br>
+    <span class="label">Тема:</span> Постановление на работу с субъектом 001-AYZG-093<br>
+    <span class="label">Дата:</span> [10.02.2025 | 04:16:34 UTC]
+  </div>
+
+  <div class="section">
+    Маркус,<br><br>
+
+    Ты и я оба понимаем, что есть вещи, к которым не стоит приближаться. 001-AYZG-093 — не один из них.  
+    Это <em>не</em> вещь. Это не ошибка природы, не выброс, не сознательная враждебность.  
+    Это осознанная Пустота, принявшая форму пространства.
+  </div>
+
+  <div class="section">
+    Ты назначаешься старшим координатором по непрямой оценке структуры и поведенческого фона объекта 093.  
+    Твоя задача не включает контакт, не включает вход, не включает соприкосновение.  
+    Только <strong>обход</strong>, <strong>перехват</strong>, <strong>анализ фрагментов</strong>, <strong>деконструкция слухов и мифов</strong>.
+  </div>
+
+  <div class="section">
+    <span class="label">Ты получаешь доступ к:</span><br>
+    — архиву по делу аномалии<br>
+    — расшифровкам с Компаса Садамора<br>
+    — архиву "001-AYZG" (приказ мэров 4/4)
+  </div>
+
+  <div class="section">
+    <span class="label warning">Предельно запрещено:</span><br><br>
+    — Инициировать прямые исследования без одобрения СТК;<br>
+    — Пытаться воссоздать внутреннюю архитектуру 093 по фрагментам;<br>
+    — Использовать слово “свет” в связке с категорией “защитные маркеры” без контроля контекста.
+  </div>
+
+  <div class="section">
+    С этого момента ты действуешь вне стандартных протоколов.  
+    Отчётность — лично мне, еженедельно, шифром Δ-Чёрный.  
+    Ни одна строка не должна попасть в цифровое хранилище — только из уст в уши или по закрытому каналу.
+  </div>
+
+  <div class="section">
+    <em>Если ты увидишь её — не называй это именем.<br>
+    Если ты услышишь голос — не отвечай.<br>
+    Если ты почувствуешь, что мир стал... неподвижным — уходи, и не возвращайся.</em>
+  </div>
+
+  <div class="section">
+    Маркус.<br>
+    <strong>Не геройствуй.</strong>
+  </div>
+
+  <div class="signature">
+    — Ф.М.<br>
+    (подпись: нестабильная, размазанная)
+  </div>
+</div></div>
+  <div id="mail2" class="window"><div class="window-header">Добро пожаловать в «ODAS» <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content">
+    <div class="container">
+    <h1>Добро пожаловать в Организацию по Устранению Аномалий (ODAS)</h1>
+
+    <p>С этого момента вы становитесь частью закрытой структуры, созданной с единственной целью — защитой человечества от аномалий. Эти субъекты, сущности и явления нарушают фундаментальные законы физики, биологии, времени и реальности. Они опасны, непредсказуемы и, в большинстве случаев, непостижимы. Ваша задача — нейтрализовать их и их последствия.</p>
+
+    <p>Организация частично существует вне рамок международного права, работает автономно, но не всегда имеет полное право на принятие решений, касающихся жизней, территорий и информации. Ваша новая личность обыкновенна. Вас теперь двое — вы ведете двойную жизнь. Вы — сотрудник ODAS.</p>
+
+    <p>Внутри организации действует строгая иерархия. Все операции подчиняются Центральному Командованию. Ваша должность определяет, какую информацию вы имеете право знать и к каким субъектам можете приближаться. Попытки нарушения протокола, распространения закрытых данных или проявления инициативы вне установленных инструкций караются дисциплинарными мерами вплоть до физической ликвидации.</p>
+
+    <p>Ваша текущая позиция предполагает непосредственное участие в операциях по сдерживанию и анализу аномальных субъектов. Вас ждут контакты с неизвестным. Иногда — с тем, что нельзя описать словами. Подготовьтесь к тому, что здравый смысл и логика не всегда будут вашими союзниками.</p>
+
+    <p>Каждая аномалия уникальна. Некоторые безвредны, другие способны уничтожить города, изменять сознание, деформировать время или переписывать физическую реальность. В случае проявления субъектов, мы активируем Протокол <strong>"Созидание в норму"</strong> — сдерживание аномальных субъектов. Это не жестокость. Это необходимость. Единственная альтернатива — конец привычного мира.</p>
+
+    <p>В нашем мире во тьме мы играем одну из ключевых ролей. Мы не единственные, но едины. Помните, что другие группировки, коалиции и организации не всегда на нашей стороне. Не забывайте главную цель — безопасность граждан.</p>
+
+    <p><strong>Вы не герой. Вы инструмент.</strong> Служба в ODAS — это подвиг. Вы не получите признания, но вы выйдете в отставку с почестями. Лучшее, на что вы можете рассчитывать, — быть забытым во тьме, но уйти сильным.</p>
+
+    <p>Все ваши действия отслеживаются. Все ваши мысли могут быть проверены. В случае контакта с несанкционированной информацией или аномалией, вы обязаны немедленно обратиться в Психологический отдел для получения помощи. Если вы чувствуете, что теряете связь с реальностью — немедленно сообщите об этом. Медлить опасно.</p>
+
+    <p>Вы станете свидетелем вещей, которые противоречат самому понятию реальности. Вы будете работать с тем, что нельзя описать, сдерживать то, что нельзя удержать, и уничтожать то, что нельзя убить. Вам придётся принять, что не все можно понять. Иногда лучше не знать.</p>
+
+    <p>Последний, но самый важный пункт: мы работаем с <strong>«обыденными»</strong> аномалиями, которые появляются снова и снова. Наша с вами цель — обезопасить людей.</p>
+
+    <p style="text-align: center; margin-top: 2em;"><strong>Организация благодарит вас за готовность служить.<br>С этого момента вы — сотрудник ODAS.<br>Добро пожаловать в темноту.</strong></p>
+  </div></div></div>
+  <div id="mail1" class="window"><div class="window-header">Приветствие и уточнение по категории "обыденные аномалии" <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"><div class="email-container">
+  <div class="header">
+    <div><strong>От:</strong> Маркус Брам</div>
+    <div><strong>Кому:</strong> Фелликс Мюллер</div>
+    <div class="subject"><strong>Тема:</strong> Приветствие и уточнение по категории "обыденные аномалии"</div>
+  </div>
+  <div class="body-text">
+Здравствуйте, господин Мюллер.
+
+Позвольте начать с приветствия — рад оказаться частью команды и надеюсь на продуктивное сотрудничество. Уже на первых этапах ознакомления с системой, протоколами и внутренними категориями я убедился в том, насколько тщательно структурирована работа и насколько высокие требования предъявляются к деталям.
+
+В этой связи хотел бы задать несколько вопросов, касающихся одного термина, который регулярно встречается в базовых досье — а именно, категории так называемых "обыденных аномалий".
+
+Судя по контексту, данный тип не относится ни к высокоопасным, ни к нестабильным проявлениям, но и не рассматривается как полностью игнорируемый. В связи с этим хочу уточнить:
+
+Что именно считается "обыденной" аномалией в рамках классификации? Является ли это формальной категорией или скорее оперативным обозначением?
+
+Означает ли "обыденность" низкую степень опасности, стабильное поведение, частое появление, либо речь идёт об объектах, которые по тем или иным причинам не требуют немедленного вмешательства?
+
+Каков порядок доступа к полной информации по таким объектам? Достаточно ли стандартного запроса в архив, или существуют отдельные регистры или кураторы, контролирующие распространение данных?
+
+И, наконец, есть ли установленный протокол действий для сотрудников, которым поручается работа с обыденными аномалиями? Предполагается ли наблюдение, сбор данных, участие в классификации, либо другие формы вовлечённости?
+
+Я понимаю, что в первые дни важно не перегружать себя лишними вопросами, однако считаю полезным как можно раньше выстроить чёткое понимание внутренних определений и приоритетов. Буду признателен за любые разъяснения или, если потребуется, за направление к соответствующему источнику информации.
+
+С уважением и надеждой на дальнейшее взаимодействие,  
+Маркус Брам
+  </div>
+</div>
+
+<div class="email-container reply">
+  <div class="header">
+    <div><strong>От:</strong> Фелликс Мюллер</div>
+    <div><strong>Кому:</strong> Маркус Брам</div>
+    <div class="subject"><strong>Тема:</strong> Re: Приветствие и уточнение по категории "обыденные аномалии"</div>
+  </div>
+  <div class="body-text">
+Здравствуйте, Маркус.
+
+Спасибо за ваше письмо и интерес к деталям нашей работы.
+
+Позвольте сразу прояснить ключевой момент по поводу термина "обыденные аномалии". В компании ODAS это не означает, что данные аномалии «обычные» или неопасные. Наоборот, термин скорее подчёркивает, что такие аномалии проявляются повторяющимися циклами и имеют тенденцию к постоянному появлению в любом месте.
+
+Главная задача нашей организации — подавлять эти циклы, предотвращая их возобновление, тем самым минимизируя длительное влияние и повторяющиеся риски. Мы не занимаемся сохранением или изучением аномалий, которые существуют в единичных экземплярах и могут быть сдержаны. Такие объекты не представляют для нас приоритетной угрозы, и зачастую их можно оставить под контролем других сил.
+
+Что же касается нашей деятельности в целом — ODAS не просто изучает, а активно уничтожает аномалии, которые представляют реальную угрозу безопасности людей. Мы не расходуем ресурсы на объекты, однотипные и не представляющие существенной угрозы, ведь наша миссия — обезопасить людей от действительно опасных проявлений.
+
+Таким образом, «обыденные аномалии» — это те цикличные проявления, которые мы пытаемся подавить на корню, предотвращая их систематическое влияние. Для работы с такими объектами у нас есть четкие протоколы наблюдения, реагирования и ликвидации.
+
+Если у вас возникнут дополнительные вопросы или понадобится более подробная информация, всегда рад помочь.
+
+С уважением,  
+Фелликс Мюллер  
+ODAS
+  </div>
+</div></div></div>
+</div>
+<script>
+  const correctLogin = "1";
+  const correctPassword = "1";
+
+  function tryLogin() {
+    const login = document.getElementById("loginInput").value;
+    const pass = document.getElementById("passInput").value;
+    if (login === correctLogin && pass === correctPassword) {
+      document.getElementById("lockScreen").style.display = "none";
+      document.getElementById("welcomeScreen").style.display = "flex";
+      setTimeout(() => {
+        document.getElementById("welcomeScreen").style.display = "none";
+        document.getElementById("desktop").style.display = "block";
+      }, 2000);
+    } else {
+      alert("Неверный логин или пароль");
+    }
+  }
+
+  function openWindow(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  function openDoc(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  // Перетаскивание окон
+  document.querySelectorAll('.window').forEach(win => {
+    const header = win.querySelector('.window-header');
+    let offsetX = 0, offsetY = 0, dragging = false;
+
+    header.addEventListener('mousedown', (e) => {
+      dragging = true;
+      offsetX = e.clientX - win.offsetLeft;
+      offsetY = e.clientY - win.offsetTop;
+      win.style.zIndex = parseInt(Date.now() / 1000); // поднятие окна
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (dragging) {
+        win.style.left = (e.clientX - offsetX) + 'px';
+        win.style.top = (e.clientY - offsetY) + 'px';
+      }
+    });
+
+    window.addEventListener('mouseup', () => dragging = false);
+  });
+</script>
+
+</body>
+</html>
