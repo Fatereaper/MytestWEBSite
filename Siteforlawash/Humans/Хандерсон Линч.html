@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Windows 10 Emulator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0078D7;
+      overflow: hidden;
+    }
+
+    #lockScreen, #welcomeScreen, #desktop {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #lockScreen { display: flex; color: white;
+    background-image: url(avatar\look.jpg);
+  align-items: center; }
+    #welcomeScreen { background: #0078D7; color: white; font-size: 24px; background-image: url(avatar\look.jpg); }
+    #desktop { background: #1b1b1b; color: white; overflow: hidden;
+    background-image: url(avatar\worktable.jpg); }
+
+    .inputBox {
+      background: rgba(0,0,0,0.4);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .inputBox input {
+      padding: 10px;
+      border: none;
+      margin: 10px;
+      border-radius: 5px;
+      width: 200px;
+      font-size: 16px;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      border: 2px solid white;
+    }
+
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 48px;
+      width: 100%;
+      background: rgba(30,30,30,0.95);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+    #startButton {
+      width: 32px;
+      height: 32px;
+      background-image: url('https://cdn-icons-png.flaticon.com/128/25/25412.png');
+      background-size: cover;
+      margin-right: 10px;
+    }
+    #searchBox {
+      background: #2f2f2f;
+      color: gray;
+      border-radius: 6px;
+      padding: 5px 10px;
+      margin-right: auto;
+      font-size: 14px;
+    }
+    #fateTime {
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .icon {
+      width: 60px;
+      margin: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .icon img {
+      width: 48px;
+      height: 48px;
+    }
+
+    .window {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      background: white;
+      color: black;
+      border-radius: 8px;
+      overflow: hidden;
+      top: 100px;
+      left: 100px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 0 10px black;
+      z-index: 100;
+    }
+    .window-header {
+      background: #0078D7;
+      color: white;
+      padding: 10px 20px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .window-content {
+      flex: 1;
+      padding: 20px;
+      background: #f0f0f0;
+      overflow: auto;
+      text-align: justify;
+    }
+
+    .doc {
+      background: white;
+      border: 1px solid #ccc;
+      margin: 5px 0;
+      padding: 5px;
+      cursor: pointer;
+    }
+        .container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #2e3a59;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #44506b;
+      margin-top: 30px;
+    }
+    p {
+      font-size: 16px;
+      color: #333;
+      line-height: 1.6;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      margin-bottom: 6px;
+      color: #444;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #555;
+    }
+    .email {
+      font-weight: bold;
+      color: #2b6cb0;
+    }
+    .bodd {
+      font-family: 'Spectral SC', serif;
+      background-color: #f6f1e7;
+      color: #2b2b2b;
+      padding: 40px;
+      line-height: 1.7;
+      max-width: 900px;
+      margin: auto;
+      border: 1px solid #d2c7a5;
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      margin: 0;
+    }
+
+    .subtext {
+      font-size: 16px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .photo {
+      text-align: right;
+      font-size: 16px;
+      color: #444;
+    }
+
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    h3 {
+      color: #1a4da1;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="lockScreen">
+  <div class="inputBox">
+    <img src=""avatar\un.jpg"" class="avatar" id="lockAvatar">
+    <div><input type="text" id="loginInput" placeholder="Логин" /></div>
+    <div><input type="password" id="passInput" placeholder="Пароль" /></div>
+    <button onclick="tryLogin()">Войти</button>
+  </div>
+</div>
+
+<div id="welcomeScreen">
+  <img src="https://i.pinimg.com/originals/ea/76/c3/ea76c343f9bbd6917e9a094b9317ab9e.jpg" class="avatar">
+  <div>Добро пожаловать, Линч</div>
+</div>
+
+<div id="desktop">
+  <div style="display:flex; flex-wrap: wrap; padding: 10px;">
+    <div class="icon" onclick="openWindow('folderWindow')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477585.png" />
+      <div>Личное</div>
+    </div>
+    <div class="icon" onclick="openWindow('mailWindow')">
+      <img src="https://cdn-icons-png.flaticon.com/128/4477/4477656.png" />
+      <div>Почта</div>
+    </div>
+      <div id="taskbar">
+    <div id="startButton"></div>
+    <div id="searchBox">Введите запрос для поиска</div>
+    <div id="fateTime">
+      <div>FateTime</div>
+      <div>17:43</div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Папка -->
+  <div id="folderWindow" class="window">
+    <div class="window-header">
+      Личное 
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('doc1')">Личное дело</div>
+    </div>
+  </div>
+
+  <!-- Почта -->
+  <div id="mailWindow" class="window">
+    <div class="window-header">
+      Почта
+      <button onclick="this.closest('.window').style.display='none'">X</button>
+    </div>
+    <div class="window-content">
+      <div class="doc" onclick="openDoc('mail1')">"Приветствие" От CoorporationForHouse</div>
+    </div>
+  </div>
+
+  <!-- Документы и письма -->
+  <div id="doc1" class="window"><div class="window-header">Личное дело <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content">
+  <div class="header">
+    <div>
+      <h1>Ваше имя</h1>
+      <div class="subtext">Когда вы родились</div>
+    </div>
+    <div class="photo">Фото сюда</div>
+  </div>
+
+  <div class="content">
+    <div class="column">
+      <h3>Немного о вас в 3 лице</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+
+      <h3>Что у вас будет из своих вещей</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+
+      <h3>Внешность и состояние здоровья</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+    </div>
+
+    <div class="column">
+      <h3>Особые качества человека</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+
+      <h3>Грамоты и заслуги</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+
+      <h3>Место рождения</h3>
+      <ul>
+        <li>Сюда текст</li>
+        <li>Сюда текст</li>
+      </ul>
+    </div></div></div>
+  </div></div>
+</div>
+  <div id="mail1" class="window"><div class="window-header">"Приветствие" От CoorporationForHouse <button onclick="this.closest('.window').style.display='none'">X</button></div><div class="window-content"><div class="container">
+    <h1>Добро пожаловать!</h1>
+
+    <p>Рады приветствовать вас в <strong>новой пристройке жилого комплекса Авангелион!</strong><br>
+    Вы стали жильцом современного дома, спроектированного с учётом комфорта и безопасности. Ваш новый дом — это часть недавно завершённой очереди застройки, в которой применены улучшенные инженерные решения, современные лифты, шумоизоляция и обновлённая система видеонаблюдения.</p>
+
+    <p>Несмотря на то, что вы проживаете в квартире по договору аренды, вы — полноценный житель нашего дома. Мы стремимся к тому, чтобы каждый арендатор чувствовал себя здесь как дома и уважал окружающих.</p>
+
+    <h2>Правила проживания, которые важно соблюдать:</h2>
+
+    <h3>Тихие часы:</h3>
+    <ul>
+      <li>С <strong>22:00 до 07:00</strong> действует режим тишины.</li>
+      <li>В этот период <strong>выход из квартиры без необходимости не допускается</strong>. Это правило введено для обеспечения покоя соседей в ночное время, особенно в связи с высокой звукоотдачей новых конструкций подъезда.</li>
+    </ul>
+
+    <h3>Общие правила безопасности:</h3>
+    <ul>
+      <li>Не оставляйте двери парадного входа открытыми.</li>
+      <li>Посторонние лица допускаются только при вашем сопровождении.</li>
+      <li>Пожарные выходы использовать строго по назначению.</li>
+    </ul>
+
+    <h3>Чистота и порядок:</h3>
+    <ul>
+      <li>Поддерживайте чистоту в подъезде, лифте и коридорах.</li>
+      <li>Мусор необходимо выносить в контейнерную зону, расположенную <em>[указать место]</em>.</li>
+    </ul>
+
+    <h3>Домашние животные:</h3>
+    <ul>
+      <li>Допускается содержание домашних животных при соблюдении чистоты и тишины.</li>
+      <li>Уборка за питомцами в подъезде и на улице обязательна.</li>
+    </ul>
+
+    <h3>Общие зоны:</h3>
+    <ul>
+      <li>Лифты, лестничные площадки и холлы — это общая собственность. Относитесь к ним бережно.</li>
+      <li>Дворовая зона и игровая площадка работают с <strong>08:00 до 21:00</strong>.</li>
+    </ul>
+
+    <h3>Парковка:</h3>
+    <ul>
+      <li>Парковка возможна только на обозначенных местах.</li>
+      <li>Стоянка у подъездов и на пожарных проездах запрещена.</li>
+    </ul>
+
+    <p>Мы верим, что при соблюдении этих простых правил ваше проживание будет максимально комфортным. Если у вас возникнут вопросы по бытовым вопросам, аренде или техническому состоянию квартиры — обращайтесь напрямую к вашему арендодателю или в управляющую компанию:</p>
+
+    <p class="email">Почта: CoorporationForHouse@mail.com</p>
+
+    <div class="footer">
+      Спасибо, что выбрали наш дом!<br>
+      Добро пожаловать и приятного проживания.<br><br>
+      С уважением,<br>
+      Осберг Грам<br>
+      21.07.2025
+    </div>
+  </div>
+</div>
+
+<script>
+  const correctLogin = "Хандерсон Линч";
+  const correctPassword = "344121";
+
+  function tryLogin() {
+    const login = document.getElementById("loginInput").value;
+    const pass = document.getElementById("passInput").value;
+    if (login === correctLogin && pass === correctPassword) {
+      document.getElementById("lockScreen").style.display = "none";
+      document.getElementById("welcomeScreen").style.display = "flex";
+      setTimeout(() => {
+        document.getElementById("welcomeScreen").style.display = "none";
+        document.getElementById("desktop").style.display = "block";
+      }, 2000);
+    } else {
+      alert("Неверный логин или пароль");
+    }
+  }
+
+  function openWindow(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  function openDoc(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  // Перетаскивание окон
+  document.querySelectorAll('.window').forEach(win => {
+    const header = win.querySelector('.window-header');
+    let offsetX = 0, offsetY = 0, dragging = false;
+
+    header.addEventListener('mousedown', (e) => {
+      dragging = true;
+      offsetX = e.clientX - win.offsetLeft;
+      offsetY = e.clientY - win.offsetTop;
+      win.style.zIndex = parseInt(Date.now() / 1000); // поднятие окна
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (dragging) {
+        win.style.left = (e.clientX - offsetX) + 'px';
+        win.style.top = (e.clientY - offsetY) + 'px';
+      }
+    });
+
+    window.addEventListener('mouseup', () => dragging = false);
+  });
+</script>
+
+</body>
+</html>
